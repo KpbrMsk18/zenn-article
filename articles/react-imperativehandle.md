@@ -6,9 +6,83 @@ topics: ["react", "hooks", "typescript", "frontend", "react19"]
 published: false
 ---
 
+# なぜuseImperativeHandleが必要になったのか？
+
+## 実体験：フォームビルダー開発での課題
+
+先日、ドラッグ&ドロップでコンポーネントを配置するフォームビルダーをNext.jsで開発していました。その際に直面した課題が、複雑な状態管理でした。
+
+### 最初の実装：stateのバケツリレー地獄
+
+最初は従来通り、stateのバケツリレーでの実装を考えていました：
+
+```typescript
+// 親コンポーネントで全ての状態を管理
+const [formLayout, setFormLayout] = useState({});
+const [saveStatus, setSaveStatus] = useState('idle');
+const [tempSaveData, setTempSaveData] = useState({});
+
+// 深い階層の子コンポーネントまでpropsでバケツリレー
+<FormBuilder
+  formLayout={formLayout}
+  onLayoutChange={setFormLayout}
+  saveStatus={saveStatus}
+  onSave={handleSave}
+  tempSaveData={tempSaveData}
+  onTempSave={handleTempSave}
+  // さらに多くのpropsが必要...
+>
+  <LayoutRenderer
+    layout={formLayout}
+    onLayoutChange={setFormLayout}
+    // 同じpropsを再度渡す必要...
+  >
+    <ComponentPalette
+      onSave={handleSave}
+      onTempSave={handleTempSave}
+      // またも同じpropsを...
+    />
+  </LayoutRenderer>
+</FormBuilder>
+```
+
+### 問題点：可読性とメンテナンス性の悪化
+
+この方法では以下の問題がありました：
+
+- **フォームレイアウトの状態管理**が複数の階層を跨いでバケツリレー
+- **保存機能**、**一時保存機能**、**レイアウト反映機能**の状態がすべて親で管理される
+- 深い階層のコンポーネントまで同じpropsを何度も渡す必要
+- コードの可読性が著しく低下し、メンテナンスが困難に
+
+### 解決策の模索：「Storeのようにどこでも関数を実行したい」
+
+そこで「Storeのようにどこでも関数を実行できる方法はないか？」と検索していたところ、`useImperativeHandle`を発見しました。
+
+### 最初の懸念：本当に使って良いのか？
+
+ただし、最初は非常に懐疑的でした。理由は以下の通りです：
+
+1. **Reactの宣言的パラダイムに反するのではないか？**
+   - Reactは「データが上から下に流れる」という原則を重視している
+   - `useImperativeHandle`は明らかに命令的なアプローチ
+
+2. **React公式ドキュメントの記載**
+   - refは「避難ハッチ（escape hatch）」として使用するよう記載されている
+   - 「通常のReactのデータフローの外で何かを行う必要がある場合の最後の手段」という位置づけ
+   - 積極的に推奨されているわけではない
+
+しかし、現実的に考えてみると、propsとstateだけでは解決できない複雑な状態管理の問題がありました。やりたいことを実現するためには必要だと判断し、試してみることにしました。
+
+### 結果：期待以上の簡素な実装
+
+実際に使ってみると、バケツリレーよりもはるかに簡単で、煩雑さもなく実装できました。期待していた通り、簡素な実装で理想的な結果が得られたのです。
+
+---
+
 # React 19 で useImperativeHandle が劇的に簡単になった！
 
-React 19 で`useImperativeHandle`の使い方が大幅に簡素化されました。これまで React 18 では`forwardRef`という複雑な概念を理解する必要がありましたが、**React 19 では通常の props と同じように`ref`を扱えるようになり、格段に使いやすくなりました**。
+そして今回、React 19 で`useImperativeHandle`の使い方が大幅に簡素化されました。これまで React 18 では`forwardRef`という複雑な概念を理解する必要がありましたが、**React 19 では通常の props と同じように`ref`を扱えるようになり、格段に使いやすくなりました**。
 
 `useImperativeHandle`は、親コンポーネントから子コンポーネントの内部機能にアクセスできるようにする Hook です。通常の React の「上から下へのデータフロー」とは逆方向の操作を可能にします。
 
