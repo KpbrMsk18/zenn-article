@@ -4,6 +4,7 @@ emoji: "⚛️"
 type: "tech"
 topics: ["react", "hooks", "typescript", "frontend", "react19"]
 published: false
+publication_name: "uguisu_blog"
 ---
 
 # なぜ useImperativeHandle が必要になったのか？
