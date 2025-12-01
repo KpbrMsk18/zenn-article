@@ -7,7 +7,7 @@ published: false
 publication_name: "uguisu_blog"
 ---
 
-うぐいすソリューションズアドベントカレンダー 11 日目。担当のかぴばらです！
+[うぐいすソリューションズ Advent Calendar](https://qiita.com/advent-calendar/2025/uguisu-solutions) 11 日目。担当のかぴばらです！
 私はこれまでフロントエンドを主に担当してきて、バックエンドも少しだけ触ったりしたもののあまり理解ができていませんでした。
 先日、 AI に相談したところ「タスク管理ツールは CRUD がシンプルで理解しやすいよ」という回答が返ってきたので、それを作って解説してもらいました！
 
